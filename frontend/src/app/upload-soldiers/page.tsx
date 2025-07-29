@@ -61,7 +61,7 @@ export default function UploadSoldiersPage() {
 
       // Provide our own type for the row so that `row` isn’t implicitly `any`
       worksheet.eachRow((row: ExcelRowValues, rowIndex: number): void => {
-      // row.values is defined as any[] in the typings, so cast it
+        // row.values is defined as any[] in the typings, so cast it
         const rowValues = row.values as (string | number | undefined | null)[]
         if (rowIndex === 1) {
           // Capture header names from the first row (skip the first blank cell)
@@ -136,7 +136,6 @@ export default function UploadSoldiersPage() {
                 <select
                   id={field}
                   value={columnMap[field] || ''}
-                  // Explicitly type `e` so that it isn’t inferred as `any`
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                     handleMappingChange(field, e.target.value)
                   }
