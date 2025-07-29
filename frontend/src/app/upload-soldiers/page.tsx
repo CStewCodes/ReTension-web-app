@@ -20,6 +20,8 @@ type NormalizedRow = Record<RequiredField, string>
 // A minimal interface for rows returned by ExcelJS. We only care about the `values` property.
 interface ExcelRowValues {
   values: (string | number | undefined | null)[]
+  // ExcelJS Row type also has a `getCell` method, which we need to satisfy the Row type
+  getCell: (column: string | number) => { value: string | number | undefined | null }
 }
 
 export default function UploadSoldiersPage() {
@@ -60,7 +62,7 @@ export default function UploadSoldiersPage() {
       let headers: string[] = []
 
       // Provide our own type for the row so that `row` isn’t implicitly `any`
-      worksheet.eachRow((row: ExcelRowValues, rowIndex: number): void => {
+      worksheet.eachRow((row: ExcelJS.Row, rowIndex: number): void => {
         // row.values is defined as any[] in the typings, so cast it
         const rowValues = row.values as (string | number | undefined | null)[]
         if (rowIndex === 1) {
