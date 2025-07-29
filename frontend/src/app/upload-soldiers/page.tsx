@@ -115,13 +115,17 @@ export default function UploadSoldiersPage() {
     <main className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Upload Soldiers (Excel)</h1>
 
-      {/* File input to select an .xlsx file */}
-      <input
-        type="file"
-        accept=".xlsx"
-        onChange={handleFile}
-        className="mb-4"
-      />
+      <div className="mb-4">
+        <label htmlFor="excel-file-upload" className="block text-sm font-medium text-gray-700 sr-only">
+          Upload Excel File
+        </label>
+        <input
+          id="excel-file-upload"
+          type="file"
+          accept=".xlsx"
+          onChange={handleFile}
+        />
+      </div>
 
       {error && <p className="text-red-500 mb-4">❌ {error}</p>}
 

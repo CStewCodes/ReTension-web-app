@@ -50,12 +50,12 @@ export default function SoldiersPage() {
         <tbody>
           {soldiers.map((s) => (
             <tr key={s.dodid} className="odd:bg-gray-900 even:bg-gray-800">
-              <td className="border px-4 py-2">{s.dodid}</td>
-              <td className="border px-4 py-2">{s.first_name}</td>
-              <td className="border px-4 py-2">{s.last_name}</td>
-              <td className="border px-4 py-2">{s.email}</td>
-              <td className="border px-4 py-2">{s.component}</td>
-              <td className="border px-4 py-2">{s.mos}</td>
+              <td className="border px-4 py-2">{s.dodid || ''}</td>
+              <td className="border px-4 py-2">{s.first_name || ''}</td>
+              <td className="border px-4 py-2">{s.last_name || ''}</td>
+              <td className="border px-4 py-2">{s.email || ''}</td>
+              <td className="border px-4 py-2">{s.component || ''}</td>
+              <td className="border px-4 py-2">{s.mos || ''}</td>
             </tr>
           ))}
         </tbody>
