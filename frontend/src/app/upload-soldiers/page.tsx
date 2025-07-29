@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import ExcelJS, { Row } from 'exceljs'
+import ExcelJS from 'exceljs'
 
 // Raw rows use the headers from the Excel file. Values may be strings,
 // numbers, null or undefined while the sheet is being parsed.
@@ -16,6 +16,11 @@ type RequiredField = (typeof requiredFields)[number]
 
 // A normalized row contains only the required fields, each as a string.
 type NormalizedRow = Record<RequiredField, string>
+
+// A minimal interface for rows returned by ExcelJS. We only care about the `values` property.
+interface ExcelRowValues {
+  values: (string | number | undefined | null)[]
+}
 
 export default function UploadSoldiersPage() {
   // State to store the headers from the uploaded Excel sheet
@@ -54,9 +59,10 @@ export default function UploadSoldiersPage() {
       const rows: RawRow[] = []
       let headers: string[] = []
 
-      worksheet.eachRow((row: Row, rowIndex: number): void => {
-        // row.values is defined as any[] in the typings, so cast it
-        const rowValues = row.values as Array<string | number | undefined | null>
+      // Provide our own type for the row so that `row` isn’t implicitly `any`
+      worksheet.eachRow((row: ExcelRowValues, rowIndex: number): void => {
+      // row.values is defined as any[] in the typings, so cast it
+        const rowValues = row.values as (string | number | undefined | null)[]
         if (rowIndex === 1) {
           // Capture header names from the first row (skip the first blank cell)
           headers = rowValues.slice(1).map((cell) => String(cell ?? ''))
@@ -92,7 +98,7 @@ export default function UploadSoldiersPage() {
    * rows are stored in state for preview.
    */
   const handlePreview = (): void => {
-    const mapped: NormalizedRow[] = rawData.map((row) => {
+    const mapped: NormalizedRow[] = rawData.map((row: RawRow): NormalizedRow => {
       const mappedRow: NormalizedRow = {} as NormalizedRow
       requiredFields.forEach((key) => {
         const sourceKey = columnMap[key]
@@ -130,8 +136,9 @@ export default function UploadSoldiersPage() {
                 <select
                   id={field}
                   value={columnMap[field] || ''}
-                  onChange={(e) =>
-                    handleMappingChange(field, (e.target as HTMLSelectElement).value)
+                  // Explicitly type `e` so that it isn’t inferred as `any`
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    handleMappingChange(field, e.target.value)
                   }
                   className="p-2 border rounded"
                 >
