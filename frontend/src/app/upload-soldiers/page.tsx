@@ -29,7 +29,7 @@ export default function UploadSoldiersPage() {
       let headers: string[] = []
 
       worksheet.eachRow((row, rowIndex) => {
-        const rowValues = row.values as any[]
+        const rowValues = row.values as (string | number | undefined | null)[]
 
         if (rowIndex === 1) {
           // Header row
@@ -57,7 +57,7 @@ export default function UploadSoldiersPage() {
 
   const handlePreview = () => {
     const mapped = rawData.map((row) => {
-      const mappedRow: any = {}
+      const mappedRow: Record<string, string> = {}
       for (const key in columnMap) {
         mappedRow[key] = row[columnMap[key]] || ''
       }
