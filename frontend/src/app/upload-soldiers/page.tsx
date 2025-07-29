@@ -3,15 +3,16 @@
 import { useState } from 'react'
 import ExcelJS from 'exceljs'
 
-type RawRow = { [key: string]: any }
+type RawRow = Record<string, string | number | null | undefined>
+type NormalizedRow = Record<string, string>
 
 const requiredFields = ['dodid', 'first_name', 'last_name', 'mos', 'component']
 
 export default function UploadSoldiersPage() {
   const [rawHeaders, setRawHeaders] = useState<string[]>([])
   const [rawData, setRawData] = useState<RawRow[]>([])
-  const [columnMap, setColumnMap] = useState<{ [key: string]: string }>({})
-  const [normalizedData, setNormalizedData] = useState<any[]>([])
+  const [columnMap, setColumnMap] = useState<Record<string, string>>({})
+  const [normalizedData, setNormalizedData] = useState<NormalizedRow[]>([])
   const [error, setError] = useState<string | null>(null)
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,10 +31,8 @@ export default function UploadSoldiersPage() {
 
       worksheet.eachRow((row, rowIndex) => {
         const rowValues = row.values as (string | number | undefined | null)[]
-
         if (rowIndex === 1) {
-          // Header row
-          headers = rowValues.slice(1)
+          headers = rowValues.slice(1).map((cell) => String(cell ?? ''))
           setRawHeaders(headers)
         } else {
           const rowObj: RawRow = {}
@@ -45,7 +44,7 @@ export default function UploadSoldiersPage() {
       })
 
       setRawData(rows)
-    } catch (err: any) {
+    } catch (err) {
       console.error(err)
       setError('Failed to read Excel file. Make sure it is a valid .xlsx file.')
     }
@@ -57,9 +56,10 @@ export default function UploadSoldiersPage() {
 
   const handlePreview = () => {
     const mapped = rawData.map((row) => {
-      const mappedRow: Record<string, string> = {}
-      for (const key in columnMap) {
-        mappedRow[key] = row[columnMap[key]] || ''
+      const mappedRow: NormalizedRow = {}
+      for (const key of requiredFields) {
+        const sourceKey = columnMap[key]
+        mappedRow[key] = sourceKey ? String(row[sourceKey] ?? '') : ''
       }
       return mappedRow
     })
@@ -70,7 +70,12 @@ export default function UploadSoldiersPage() {
     <main className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Upload Soldiers (Excel)</h1>
 
-      <input type="file" accept=".xlsx" onChange={handleFile} className="mb-4" />
+      <input
+        type="file"
+        accept=".xlsx"
+        onChange={handleFile}
+        className="mb-4"
+      />
 
       {error && <p className="text-red-500 mb-4">❌ {error}</p>}
 
@@ -80,8 +85,11 @@ export default function UploadSoldiersPage() {
           <div className="space-y-4">
             {requiredFields.map((field) => (
               <div key={field} className="flex items-center gap-4">
-                <label className="w-40 font-medium capitalize">{field}</label>
+                <label htmlFor={field} className="w-40 font-medium capitalize">
+                  {field}
+                </label>
                 <select
+                  id={field}
                   value={columnMap[field] || ''}
                   onChange={(e) => handleMappingChange(field, e.target.value)}
                   className="p-2 border rounded"
